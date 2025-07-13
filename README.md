@@ -5,3 +5,9 @@ Muovi_silvestro # moving Silvestro
 Trash_finale_Brasile # moving Trash
 
 In folder Python:
+
+
+SW Version :
+- O.S. Ubuntu 22.04.05 LTS
+- Python 3.10.12
+- OpenCV 4.10.0.84
