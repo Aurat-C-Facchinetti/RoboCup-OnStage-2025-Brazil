@@ -6,135 +6,135 @@ Trash_finale_Brasile # moving Trash
 
 In folder Python:
 
-Package                  Version
------------------------- ----------------
-apturl                   0.5.2
-bcrypt                   3.2.0
-blinker                  1.4
-Brlapi                   0.8.3
-certifi                  2020.6.20
-chardet                  4.0.0
-click                    8.0.3
-colorama                 0.4.4
-command-not-found        0.3
-contourpy                1.3.1
-cryptography             3.4.8
-cupshelpers              1.0
-cycler                   0.12.1
-dbus-python              1.2.18
-defer                    1.0.6
-distro                   1.7.0
-distro-info              1.1+ubuntu0.2
-duplicity                0.8.21
-evdev                    1.6.1
-fasteners                0.14.1
-filelock                 3.18.0
-fonttools                4.56.0
-fsspec                   2025.3.0
-future                   0.18.2
-httplib2                 0.20.2
-idna                     3.3
-importlib-metadata       4.6.4
-imutils                  0.5.4
-jeepney                  0.7.1
-Jinja2                   3.1.6
-keyring                  23.5.0
-kiwisolver               1.4.8
-language-selector        0.1
-launchpadlib             1.10.16
-lazr.restfulclient       0.14.4
-lazr.uri                 1.0.6
-lockfile                 0.12.2
-louis                    3.20.0
-macaroonbakery           1.3.1
-Mako                     1.1.3
-MarkupSafe               2.0.1
-matplotlib               3.10.1
-monotonic                1.6
-more-itertools           8.10.0
-MouseInfo                0.1.3
-mpmath                   1.3.0
-netifaces                0.11.0
-networkx                 3.4.2
-numpy                    2.1.1
-nvidia-cublas-cu12       12.4.5.8
-nvidia-cuda-cupti-cu12   12.4.127
-nvidia-cuda-nvrtc-cu12   12.4.127
-nvidia-cuda-runtime-cu12 12.4.127
-nvidia-cudnn-cu12        9.1.0.70
-nvidia-cufft-cu12        11.2.1.3
-nvidia-curand-cu12       10.3.5.147
-nvidia-cusolver-cu12     11.6.1.9
-nvidia-cusparse-cu12     12.3.1.170
-nvidia-cusparselt-cu12   0.6.2
-nvidia-nccl-cu12         2.21.5
-nvidia-nvjitlink-cu12    12.4.127
-nvidia-nvtx-cu12         12.4.127
-oauthlib                 3.2.0
-olefile                  0.46
-opencv-python            4.10.0.84
-opencv-python-headless   4.10.0.84
-packaging                24.2
-pandas                   2.2.3
-paramiko                 2.9.3
-pexpect                  4.8.0
-pillow                   11.1.0
-pip                      22.0.2
-protobuf                 3.12.4
-psutil                   7.0.0
-ptyprocess               0.7.0
-py-cpuinfo               9.0.0
-PyAutoGUI                0.9.54
-pycairo                  1.20.1
-pycups                   2.0.1
-PyGetWindow              0.0.9
-PyGObject                3.42.1
-PyJWT                    2.3.0
-pymacaroons              0.13.0
-PyMsgBox                 1.0.9
-PyNaCl                   1.5.0
-pynput                   1.8.1
-pyparsing                2.4.7
-pyperclip                1.9.0
-pyrealsense2             2.55.1.6486
-PyRect                   0.2.0
-pyRFC3339                1.1
-PyScreeze                1.0.1
-pyserial                 3.5
-python-apt               2.4.0+ubuntu4
-python-dateutil          2.9.0.post0
-python-debian            0.1.43+ubuntu1.1
-python-xlib              0.33
-python3-xlib             0.15
-pytweening               1.2.0
-pytz                     2022.1
-pyxdg                    0.27
-PyYAML                   5.4.1
-reportlab                3.6.8
-requests                 2.25.1
-scipy                    1.15.2
-seaborn                  0.13.2
-SecretStorage            3.3.1
-setuptools               59.6.0
-six                      1.16.0
-sympy                    1.13.1
-systemd-python           234
-torch                    2.6.0
-torchvision              0.21.0
-tqdm                     4.67.1
-triton                   3.2.0
-typing_extensions        4.13.0
-tzdata                   2025.2
-ubuntu-drivers-common    0.0.0
-ubuntu-pro-client        8001
-ufw                      0.36.1
-ultralytics              8.3.97
-ultralytics-thop         2.0.14
-unattended-upgrades      0.1
-urllib3                  1.26.5
-usb-creator              0.3.7
-wadllib                  1.3.6
-wheel                    0.37.1
-xdg                      5
-xkit                     0.0.0
-zipp                     1.0.0
+Package & Version
+
+- apturl                   0.5.2
+- bcrypt                   3.2.0
+- blinker                  1.4
+- Brlapi                   0.8.3
+- certifi                  2020.6.20
+- chardet                  4.0.0
+- click                    8.0.3
+- colorama                 0.4.4
+- command-not-found        0.3
+- contourpy                1.3.1
+- cryptography             3.4.8
+- cupshelpers              1.0
+- cycler                   0.12.1
+- dbus-python              1.2.18
+- defer                    1.0.6
+- distro                   1.7.0
+- distro-info              1.1+ubuntu0.2
+- duplicity                0.8.21
+- evdev                    1.6.1
+- fasteners                0.14.1
+- filelock                 3.18.0
+- fonttools                4.56.0
+- fsspec                   2025.3.0
+- future                   0.18.2
+- httplib2                 0.20.2
+- idna                     3.3
+- importlib-metadata       4.6.4
+- imutils                  0.5.4
+- jeepney                  0.7.1
+- Jinja2                   3.1.6
+- keyring                  23.5.0
+- kiwisolver               1.4.8
+- language-selector        0.1
+- launchpadlib             1.10.16
+- lazr.restfulclient       0.14.4
+- lazr.uri                 1.0.6
+- lockfile                 0.12.2
+- louis                    3.20.0
+- macaroonbakery           1.3.1
+- Mako                     1.1.3
+- MarkupSafe               2.0.1
+- matplotlib               3.10.1
+- monotonic                1.6
+- more-itertools           8.10.0
+- MouseInfo                0.1.3
+- mpmath                   1.3.0
+- netifaces                0.11.0
+- networkx                 3.4.2
+- numpy                    2.1.1
+- nvidia-cublas-cu12       12.4.5.8
+- nvidia-cuda-cupti-cu12   12.4.127
+- nvidia-cuda-nvrtc-cu12   12.4.127
+- nvidia-cuda-runtime-cu12 12.4.127
+- nvidia-cudnn-cu12        9.1.0.70
+- nvidia-cufft-cu12        11.2.1.3
+- nvidia-curand-cu12       10.3.5.147
+- nvidia-cusolver-cu12     11.6.1.9
+- nvidia-cusparse-cu12     12.3.1.170
+- nvidia-cusparselt-cu12   0.6.2
+- nvidia-nccl-cu12         2.21.5
+- nvidia-nvjitlink-cu12    12.4.127
+- nvidia-nvtx-cu12         12.4.127
+- oauthlib                 3.2.0
+- olefile                  0.46
+- opencv-python            4.10.0.84
+- opencv-python-headless   4.10.0.84
+- packaging                24.2
+- pandas                   2.2.3
+- paramiko                 2.9.3
+- pexpect                  4.8.0
+- pillow                   11.1.0
+- pip                      22.0.2
+- protobuf                 3.12.4
+- psutil                   7.0.0
+- ptyprocess               0.7.0
+- py-cpuinfo               9.0.0
+- PyAutoGUI                0.9.54
+- pycairo                  1.20.1
+- pycups                   2.0.1
+- PyGetWindow              0.0.9
+- PyGObject                3.42.1
+- PyJWT                    2.3.0
+- pymacaroons              0.13.0
+- PyMsgBox                 1.0.9
+- PyNaCl                   1.5.0
+- pynput                   1.8.1
+- pyparsing                2.4.7
+- pyperclip                1.9.0
+- pyrealsense2             2.55.1.6486
+- PyRect                   0.2.0
+- pyRFC3339                1.1
+- PyScreeze                1.0.1
+- pyserial                 3.5
+- python-apt               2.4.0+ubuntu4
+- python-dateutil          2.9.0.post0
+- python-debian            0.1.43+ubuntu1.1
+- python-xlib              0.33
+- python3-xlib             0.15
+- pytweening               1.2.0
+- pytz                     2022.1
+- pyxdg                    0.27
+- PyYAML                   5.4.1
+- reportlab                3.6.8
+- requests                 2.25.1
+- scipy                    1.15.2
+- seaborn                  0.13.2
+- SecretStorage            3.3.1
+- setuptools               59.6.0
+- six                      1.16.0
+- sympy                    1.13.1
+- systemd-python           234
+- torch                    2.6.0
+- torchvision              0.21.0
+- tqdm                     4.67.1
+- triton                   3.2.0
+- typing_extensions        4.13.0
+- tzdata                   2025.2
+- ubuntu-drivers-common    0.0.0
+- ubuntu-pro-client        8001
+- ufw                      0.36.1
+- ultralytics              8.3.97
+- ultralytics-thop         2.0.14
+- unattended-upgrades      0.1
+- urllib3                  1.26.5
+- usb-creator              0.3.7
+- wadllib                  1.3.6
+- wheel                    0.37.1
+- xdg                      5
+- xkit                     0.0.0
+- zipp                     1.0.0
