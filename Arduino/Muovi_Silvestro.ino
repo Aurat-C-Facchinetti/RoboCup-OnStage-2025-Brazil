@@ -11,7 +11,7 @@ Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver(); // di default usa 0x4
 #define SERVOMAX 470
 #define SERVO_FREQ 50
  
-int gradi_servo[13] = {0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 90}; //array with all the servo's degrees
+int gradi_servo[14] = {0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 90, 90}; //array with all the servo's degrees
 
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire); //creation of the gyroscope
@@ -22,6 +22,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire); //creation of the gyrosc
 #define ELBOW 10
 #define WRIST 11
 #define HAND 12
+#define CAM 13
 
 // Define the start configuration of the joint 
 #define BASE_START 90 //10 170
@@ -29,10 +30,8 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire); //creation of the gyrosc
 #define ELBOW_START 180 //40 180
 #define WRIST_START 50 //100 180
 #define HAND_START 0 //10aperto 65chiuso
-#define CAM_START 180
+#define CAM_START 45
 
-//Servo telecamera
-//#define PIN_CAM 46
 //definition of every servo's name
 //Servo ginocchia
 #define GIN_ANT_SX 0
@@ -56,7 +55,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire); //creation of the gyrosc
 int gradi_per_rotazione = 0;
 
 //declaration of the movement matrixes
-int posAvanti[26][2] = {{GIN_POST_SX, 35}, {-1, DELAY_VELOCE},  //every row of the matrix has the servo's name and the degrees it has to reach
+int posIndietro[26][2] = {{GIN_POST_SX, 35}, {-1, DELAY_VELOCE},  //every row of the matrix has the servo's name and the degrees it has to reach
                         {GIN_POST_SX, 89}, {-1, DELAY_VELOCE},  //to identify a delay we use the value -1 and in the second coloumn we specify the duration of the delay
                         {GIN_POST_SX, 25}, {-1, DELAY_LENTO}, 
                         {GIN_ANT_SX, 55}, {GIN_POST_DX, 45}, {-1, DELAY_LENTO},
@@ -65,7 +64,7 @@ int posAvanti[26][2] = {{GIN_POST_SX, 35}, {-1, DELAY_VELOCE},  //every row of t
                         {GIN_ANT_DX, 47}, {GIN_POST_SX, 45}, {-1, DELAY_LENTO},
                         {ANCA_ANT_DX, 125}, {ANCA_POST_SX, 89}, {ANCA_ANT_SX, 100}, {ANCA_POST_DX, 48}, {-1, DELAY_LENTO},
                         {GIN_ANT_DX, 27}, {GIN_POST_SX, 25}}; 
-int posIndietro[26][2] = {{GIN_ANT_SX, 45}, {-1, DELAY_VELOCE},
+int posAvanti[26][2] = {{GIN_ANT_SX, 45}, {-1, DELAY_VELOCE},
                           {ANCA_ANT_SX, 100}, {-1, DELAY_VELOCE},
                           {GIN_ANT_SX, 35}, {-1, DELAY_LENTO},
                           {GIN_ANT_DX, 47}, {GIN_POST_SX, 45}, {-1, DELAY_LENTO},
@@ -92,7 +91,7 @@ int posGiraDx[23][2] = {{-1, DELAY_LENTO}, {GIN_ANT_SX, 55}, {GIN_POST_DX, 45}, 
               //0 1 2 3 4 5 6 7
               //13 23 33 43 12 22 32 42
 //declaration of the starting posiiton of the robot (starting degrees of each servo in order to get a standing position of the robot)
-int pos1[13] = {35, 27, 25, 25, 30, 135, 88, 104, BASE_START, SHOULDER_START, ELBOW_START, WRIST_START, HAND_START}; // rimetti in ordine
+int pos1[14] = {35, 27, 25, 25, 30, 135, 88, 104, BASE_START, SHOULDER_START, ELBOW_START, WRIST_START, HAND_START, CAM_START}; // rimetti in ordine
 
 float yaw;
 sensors_event_t orientationData;
@@ -101,15 +100,6 @@ uint8_t val_idx = 0;
 char value[4] = "000";
 char move;
 int fatto, quanto, lettura, offset, val;
-
-/*
-void triste() {
-  reach_goal(CAM, 180);
-  delay(3500);
-  reach_goal(CAM, 160);
-}
-*/
-
 
 //read the current position of a specified servo
 int leggi_servo(int motore){
@@ -144,12 +134,6 @@ void giro(){
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
 
-void pos_braccio_alt() {
-  reach_goal(SHOULDER, 160, DELAY_REACH_GOAL);
-  reach_goal(BASE, 0, DELAY_REACH_GOAL);
-  posizione_braccio();
-}
-
 void posizione_camminata(){
   reach_goal(BASE, BASE_START, DELAY_REACH_GOAL);
   reach_goal(SHOULDER, SHOULDER_START, DELAY_REACH_GOAL);
@@ -160,49 +144,42 @@ void posizione_camminata(){
 } 
 
 void martellate() {
-  reach_goal(HAND, 63, 20);
+  reach_goal(WRIST, 90, DELAY_REACH_GOAL);
+  val = map(0, 0, 180, 180, 0);
+    reach_goal(BASE, val, DELAY_REACH_GOAL);
   for (int i = 0; i < 3; i++) {
     //reach_goal(CAM, 180, 20);
-    
-    delay(200);
-    reach_goal(BASE, 90, DELAY_REACH_GOAL);
-    reach_goal(SHOULDER, 140, DELAY_REACH_GOAL);
-    reach_goal(ELBOW, 130, DELAY_REACH_GOAL);
-    reach_goal(WRIST, 100, DELAY_REACH_GOAL);
-    delay(700);
-    reach_goal(SHOULDER, 110, DELAY_REACH_GOAL);
-    reach_goal(ELBOW, 50, DELAY_REACH_GOAL);
-    reach_goal(WRIST, 50, DELAY_REACH_GOAL);
+    reach_goal(SHOULDER, 130, DELAY_REACH_GOAL);
+    val = map(10, 0, 180, 20, 160);
+    reach_goal(ELBOW, 180 - val, DELAY_REACH_GOAL);
+    reach_goal(WRIST, 20, DELAY_REACH_GOAL);
+    reach_goal(SHOULDER, 160, DELAY_REACH_GOAL);
+    val = map(130, 0, 180, 20, 160);
+    reach_goal(ELBOW, 180 - val, DELAY_REACH_GOAL);
+    reach_goal(WRIST, 120, DELAY_REACH_GOAL);
     delay(1000);
+
   }
   Serial.print("Yaw:");
   Serial.println(yaw);
 }
 
-void sega(){
-  reach_goal(BASE, 90, DELAY_REACH_GOAL);
-  reach_goal(SHOULDER, 95, DELAY_REACH_GOAL);
-  reach_goal(ELBOW, 45, DELAY_REACH_GOAL);
-  reach_goal(WRIST, 120, DELAY_REACH_GOAL);
-  delay(700);
-  reach_goal(HAND, 63, 20);
-
-  for (int i = 0; i < 3; i++){
-  reach_goal(ELBOW, 30, DELAY_REACH_GOAL);
+void spray() {
   reach_goal(WRIST, 90, DELAY_REACH_GOAL);
-  delay(500);
-  reach_goal(ELBOW, 45, DELAY_REACH_GOAL);
-  reach_goal(WRIST, 120, DELAY_REACH_GOAL);
-  delay(1000);
+  val = map(0, 0, 180, 180, 0);
+  reach_goal(BASE, val, DELAY_REACH_GOAL);
+  reach_goal(SHOULDER, 130, DELAY_REACH_GOAL);
+  val = map(10, 0, 180, 20, 160);
+  reach_goal(ELBOW, 180 - val, DELAY_REACH_GOAL);
+  reach_goal(WRIST, 20, DELAY_REACH_GOAL);
+  for(int i = 0; i < 6; i++){
+  val = map(0, 0, 180, 180, 0);
+  reach_goal(BASE, val, DELAY_REACH_GOAL);
+  val = map(45, 0, 180, 180, 0);
+  reach_goal(BASE, val, DELAY_REACH_GOAL);
   }
 
-  Serial.print("Yaw:");
-  Serial.println(yaw);
-}
 
-void inizio_spettacolo(){
-  muovi(ANCA_ANT_SX, 70, MOTOR_MAX_1);
-  muovi(ANCA_ANT_DX, 105, MOTOR_MAX_1);
 }
 
 void scendi_scooter(){
@@ -236,12 +213,15 @@ void rosa() {
   reach_goal(SHOULDER, 90, DELAY_REACH_GOAL);
 }
 
-void posizione_braccio(){
-  //reach_goal(CAM, 160, DELAY_REACH_GOAL);
-  reach_goal(BASE, 0, DELAY_REACH_GOAL);
-  reach_goal(ELBOW, 70, DELAY_REACH_GOAL);
-  reach_goal(SHOULDER, 180, DELAY_REACH_GOAL);
-  reach_goal(WRIST, 60, DELAY_REACH_GOAL);
+void riponi_oggetti(){
+  reach_goal(CAM, 90, DELAY_REACH_GOAL);
+  val = map(110, 0, 180, 180, 0);
+  reach_goal(BASE, val, DELAY_REACH_GOAL);
+  reach_goal(SHOULDER, 130, DELAY_REACH_GOAL);
+  val = map(90, 0, 180, 20, 160);
+  reach_goal(ELBOW, val, DELAY_REACH_GOAL);
+  reach_goal(WRIST, 75, DELAY_REACH_GOAL);
+  reach_goal(HAND, 60, DELAY_REACH_GOAL);
 }
 
 void decode_matrix(int Matrix[][2], int righe, bool isSx) {
@@ -282,10 +262,10 @@ void setup() {
   Serial.begin(115200);
   Serial.println("inzio setup");
   while (!Serial) delay(10); // wait untill the serial port opens
-  /*  if (!bno.begin()) { //try to start the gyroscope
+  if (!bno.begin()) { //try to start the gyroscope
     Serial.print("Errore: BNO055 non rilevato.");
     while (1);
-  }*/
+  }
 
   Serial.println("metà setup");
   //setting some parameters for the servos
@@ -299,9 +279,10 @@ void setup() {
   
   delay(1000);
   
-  //Serial.setTimeout(1);
+  Serial.setTimeout(1);
   //inizio_spettacolo();
-  //posizione_braccio();
+  muovi(6, 120, MOTOR_MAX_1);
+  muovi(7, 90, MOTOR_MAX_1);
 
   Serial.println("fine setup");
 
@@ -326,12 +307,6 @@ void loop() {
       giro();
       scendi_scooter();
     }
-    if(chr == 'h'){
-      idx = -1;
-      val_idx = 0;
-      giro();
-      pos_braccio_alt();
-    }
     if(chr == 'y'){
       idx = -1; 
       val_idx = 0;
@@ -348,11 +323,6 @@ void loop() {
       idx = -1;
       val_idx = 0;
       giro();
-    }
-    if(chr == 'l'){
-      idx = -1;
-      val_idx = 0;
-      posizione_braccio();
     }
     if(chr == 'k'){
       idx = -1;
@@ -434,7 +404,17 @@ void loop() {
     else if (chr == 't')    
     {
       idx = 7;
-      val_idx  = 0;
+      val_idx = 0;
+    }
+    else if(chr == 'r'){
+      idx = -1;
+      val_idx = 0;
+      riponi_oggetti();
+    }
+    else if(chr == 'o'){
+      idx = -1;
+      val_idx = 0;
+      spray();
     }
     // Separator
     else if(chr == ',') {
@@ -463,8 +443,7 @@ void loop() {
       }
       
       else if(idx == 7) { 
-        Serial.println(val);
-        //reach_goal(CAM, val, 600);
+        reach_goal(CAM, val, DELAY_REACH_GOAL);
       }
       
       else if(idx == 0) {
@@ -472,15 +451,13 @@ void loop() {
         reach_goal(BASE, val, DELAY_REACH_GOAL);
       }
       else if(idx == 1) {
-        //val = map(val, 90, 180, 90, 270);
         reach_goal(SHOULDER, val, DELAY_REACH_GOAL);
       }
       else if(idx == 2) { 
-        val = map(val, 0, 180, 20, 160);
+        //val = map(val, 0, 180, 20, 160);
         reach_goal(ELBOW, 180 - val, DELAY_REACH_GOAL);
       }
-      else if(idx == 3) { 
-        //val = map(val, 90, 180, 90, 270);
+      else if(idx == 3) {
         reach_goal(WRIST, val, DELAY_REACH_GOAL);
       }
       else if(idx == 4){
