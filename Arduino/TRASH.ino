@@ -1,5 +1,4 @@
 #include <Adafruit_PWMServoDriver.h>
-
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
@@ -12,11 +11,9 @@
 #define DIR1 44
 #define DIR2 47
 
-// Encoder x Signal y
-#define E1S1 2
-#define E1S2 4
-#define E2S1 3
-#define E2S2 9
+// Encoder Signal x
+#define ES1 3
+#define ES2 9
 
 // Bluetooth
 #define TXD 11
@@ -31,15 +28,10 @@
 #define SERVO_MAX 470
 #define SERVO_FREQ 50
 
-//Debug
-bool giro = true;
-bool giroCurveDritto = false;
-bool encoder = false;
-
 SoftwareSerial BT(TXD, RXD); 
 Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver();
 
-volatile long conteggioTick = 0;
+volatile long tickCount = 0;
 int cmTarget=100, tickTarget;
 
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
@@ -52,13 +44,14 @@ void setup() {
   BT.begin(9600);
   Wire.begin();
 
+  // Initialize the BNO055 sensor
   if (!bno.begin()) {
-    Serial.print("Errore: BNO055 non rilevato.");
+    Serial.println("Error: BNO055 not detected.");
     while (1);
   }
-  Serial.println("BNO055 pronto!");
+  Serial.println("BNO055 ready!");
 
-  // Motori
+  // Motors
   pinMode(DIR1, OUTPUT);
   pinMode(DIR2, OUTPUT);
 
@@ -73,80 +66,67 @@ void setup() {
   servo.setPWM(rEYE, 0, map(177, 0, 180, SERVO_MIN, SERVO_MAX));
   stopMotors();
 
-  // Encoder motori davanti
-  pinMode(E1S1, INPUT); 
-  pinMode(E1S2, INPUT); 
-  //attachInterrupt(digitalPinToInterrupt(E1S1), leggiEncoder, RISING);
-  pinMode(E2S1, INPUT); 
-  pinMode(E2S2, INPUT); 
-  attachInterrupt(digitalPinToInterrupt(E2S1), leggiEncoder2, RISING);
+  // Encoder
+  pinMode(ES1, INPUT); 
+  pinMode(ES2, INPUT); 
+  attachInterrupt(digitalPinToInterrupt(ES1), encoderReading, RISING);
 }
 
 String BTstring;
-char comando;
+char command;
 void loop() {
-  if (giro == true) {
-    Serial.println(leggiGiro());
-    delay(100); 
-  }
-
-  if (encoder == true) {
-    Serial.println(conteggioTick);
-    delay(100);
-  }
-
   if (BT.available()) {
     BTstring = BT.readString();
     Serial.println(BTstring);
-    comando=BTstring.charAt(0);
-    switch (comando) {
-      case 'f': // Avanti
+    command=BTstring.charAt(0);
+    switch (command) {
+      case 'f': // Forward
         goForward(BTstring.substring(1).toInt());
         break;
-      case 'b': // Indietro
+      case 'b': // Backward
         goBackward(BTstring.substring(1).toInt());
         break;
-      case 'l': // Sinistra
+      case 'l': // Left
         turnLeft(BTstring.substring(1).toInt());
         break;
-      case 'r': // Destra
+      case 'r': // Right
         turnRight(BTstring.substring(1).toInt());
         break;
-      case 's': // Ferma
+      case 's': // Stop
         stopMotors();
         break;
-      case 'o': //apre cestino
-        servo.setPWM(GATE, 0, map(100, 0, 180, SERVO_MIN, SERVO_MAX));
-        BT.println("OK");
+      case 'o': // Open Bin
+        open();
         break;
-      case 'c'://chiude cestino
-        servo.setPWM(GATE, 0, map(5, 0, 180, SERVO_MIN, SERVO_MAX));
-        BT.println("OK");
+      case 'c': // Close Bin
+        close();
         break;
-      case '1':
+      case '1': // Expressions of the Eyes
         face();
         break;
-      case 'h':
-        moveL();
-        break;
-      case 'j':
-        moveBackward();
-        break;
-      case 'k':
-        moveR();
-        break;
-      case 'u':
-        moveForward();
+      case '2': // Final scene of Trash's performance
+        final();
         break;
       default:
+        Serial.println("Incorrect command received via Bluetooth.");
         break;
     }
   }
 }
+
+void open() {
+  servo.setPWM(GATE, 0, map(100, 0, 180, SERVO_MIN, SERVO_MAX));
+  BT.println("OK");
+}
+
+void close() {
+  servo.setPWM(GATE, 0, map(5, 0, 180, SERVO_MIN, SERVO_MAX));
+  BT.println("OK");
+}
   
-float leggiGiro() {
+float gyroReading() {
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-  yaw = orientationData.orientation.x; // Yaw (orientazione sull'asse z)
+  yaw = orientationData.orientation.x; // Yaw (orientation around the Z axis)
   delay(BNO055_SAMPLERATE_DELAY_MS);
   return yaw;
 }
@@ -172,26 +152,19 @@ void face() {
   BT.println("OK");
 }
 
-void leggiEncoder (){
-  int B = digitalRead (E1S2);
-  //controlla il sengale B se è 1 per aumentare o diminuire il conteggio
-  conteggioTick += (B == 1) ? -1 : +1;
+void encoderReading (){
+  int B = digitalRead (ES2);
+  tickCount += (B == 1) ? -1 : +1;
 }
 
-void leggiEncoder2 (){
-  int B = digitalRead (E2S2);
-  //controlla il sengale B se è 1 per aumentare o diminuire il conteggio
-  conteggioTick += (B == 1) ? -1 : +1;
-}
-
-void moveL() {
+void moveR() {
   digitalWrite(DIR1, HIGH);
   digitalWrite(DIR2, LOW);
   analogWrite(PWM1, 255);
   analogWrite(PWM2, 255);
 }
 
-void moveR() {
+void moveL() {
   digitalWrite(DIR1, LOW);
   digitalWrite(DIR2, HIGH);
   analogWrite(PWM1, 255);
@@ -217,86 +190,82 @@ void stopMotors() {
   analogWrite(PWM2, 0);
 }
 
-void turnLeft(int gradii) {
-  int lettura;
-  int gradoIniziale=(int) leggiGiro();
-  if (giroCurveDritto == true) {
-    Serial.println(leggiGiro());
-  }
-  int gradiFatti=0;
+void turnLeft(int angle) {
+  int reading;
+  int initialAngle=(int) gyroReading();
+  int degreesDone=0;
   
-  // Attiva Motori
+  // Activates Motors
   moveL();
   
-  while (gradiFatti<=gradii) {
-      lettura=(int) leggiGiro();
-      gradiFatti=(360-(lettura-gradoIniziale))%360;
+  while (degreesDone<=angle) {
+      reading=(int) gyroReading();
+      degreesDone=(360-(reading-initialAngle))%360; // Calculates the degrees done
   }
   stopMotors();
-  //delay(1000);
   BT.println("OK");
-  if (giroCurveDritto == true) {
-    Serial.println(leggiGiro());
-  } 
 }
 
-void turnRight(int gradii) {
-  int lettura;
-  int gradoIniziale=(int) leggiGiro();
-  int gradiFatti=0;
+void turnRight(int angle) {
+  int reading;
+  int initialAngle=(int) gyroReading();
+  int degreesDone=0;
   
-  // Attiva Motori
+  // Activates Motors
   moveR();
 
-  while (gradiFatti<=gradii) {
-      lettura=(int) leggiGiro();
-      gradiFatti=(360+lettura-gradoIniziale);
-      gradiFatti=gradiFatti%360;
+  while (degreesDone<=angle) {
+      reading=(int) gyroReading();
+      degreesDone=(360+reading-initialAngle)%360; // Calculates the degrees done
   }
   stopMotors();
-  //delay(1000);
   BT.println("OK");
-  if (giroCurveDritto == true) {
-    Serial.println(leggiGiro());
-  }
 }
 
-void goForward(int gradi) {
-  conteggioTick=0;
-  cmTarget=gradi;
-  tickTarget = 488 * cmTarget / 22;
-  if (giroCurveDritto == true) {
-      Serial.println(leggiGiro());
-    }
+void goForward(int cmgoal) {
+  tickCount=0; // From encoder
+  cmTarget=cmgoal;
+  tickTarget = 488 * cmTarget / 22; // Target number of ticks from the encoder needed to reach cmGoal
+
   moveForward();
-  while (true) {
-    if (tickTarget < abs(conteggioTick)) {
+
+  while (true) { // When hits tickTarget the motors stop
+    if (tickTarget < abs(tickCount)) {
       stopMotors();
-      if (giroCurveDritto == true) {
-        Serial.println(leggiGiro());
-      }
       break;
     }
   }
   BT.println("OK");
 }
 
-void goBackward(int gradi) {
-  conteggioTick=0;
-  cmTarget=gradi;
-  tickTarget = (488 * cmTarget) / 22;
-  if (giroCurveDritto == true) {
-      Serial.println(leggiGiro());
-    }
+void goBackward(int cmgoal) {
+  tickCount=0; // From encoder
+  cmTarget=cmgoal;
+  tickTarget = (488 * cmTarget) / 22; // Target number of ticks from the encoder needed to reach cmGoal
+
   moveBackward();
-  while (true) {
-    if (tickTarget < abs(conteggioTick)) {
+
+  while (true) { // When hits tickTarget the motors stop
+    if (tickTarget < abs(tickCount)) {
       stopMotors();
-      if (giroCurveDritto == true) {
-        Serial.println(leggiGiro());
-      }
       break;
     }
   }
   BT.println("OK");
+}
+
+// Final scene of Trash's performance
+void final() {
+  turnRight(70);
+  delay(700);
+  goForward(55);
+  delay(700);
+  goForward(55);
+  delay(700);
+  turnLeft(90);
+  delay(700);
+  face();
+  open();
+  delay(2500);
+  close();
 }
