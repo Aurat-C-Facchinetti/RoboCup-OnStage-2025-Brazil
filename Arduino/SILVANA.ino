@@ -4,32 +4,34 @@
 #include <utility/imumaths.h>
 #include <Adafruit_PWMServoDriver.h>
 
-
+// === Motor control pins ===
 #define dir_DX 44
 #define vel_DX 2
 #define dir_SX 47
 #define vel_SX 4
 int vel_mot=200;
+// === BNO055 Gyroscope setup ===
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29, &Wire);
 
-const int Encoder1Signal1=3; //segnale 1 motore 1
-const int Encoder1Signal2=9; //segnale 2 motore 1
+// === Encoder setup ===
+const int Encoder1Signal1=3; 
+const int Encoder1Signal2=9; 
 
 volatile long encoder1Count = 0;
 
-int cmTarget=100, tickTarget=(1000 * cmTarget) / 22;
+int cmTarget=100, tickTarget=(1000 * cmTarget) / 22; // default distance
 
-Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver();
-
-//information for the use of servos 
+// === Servo controller ===
+Adafruit_PWMServoDriver servo = Adafruit_PWMServoDriver(); 
+// PWM configuration for servo control
 #define SERVOMIN 120
 #define SERVOMAX 470
 #define SERVO_FREQ 50
 
-int gradi_servo[13] = {0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 90}; //array with all the servo's degrees
+int gradi_servo[13] = {0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 90}; // Current angles for all servos
 
-// Declare the Arduino pin where each servo is connected
+// Servo IDs for clarity
 #define BASE 8
 #define SHOULDER  9
 #define ELBOW 10
@@ -37,7 +39,7 @@ int gradi_servo[13] = {0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 90}; //array with
 #define HAND 12
 #define CAM 13
 
-// Define the start configuration of the joints
+// Starting positions of each servo
 #define BASE_START 90 //10 170
 #define SHOULDER_START 95 //80 170
 #define ELBOW_START 20 //40 18c0
@@ -48,33 +50,23 @@ int gradi_servo[13] = {0, 0, 0, 0, 0, 0, 0, 0, 90, 90, 90, 90, 90}; //array with
 #define DELAY_REACH_GOAL 30
 
 //declaration of the starting posiiton of the robot (starting degrees of each servo in order to get a standing position of the robot)
-int pos1[14] = {35, 27, 25, 25, 50, 125, 48, 134, BASE_START, SHOULDER_START, ELBOW_START, WRIST_START, HAND_START, CAM_START}; // rimetti in ordine
+int pos1[14] = {35, 27, 25, 25, 50, 125, 48, 134, BASE_START, SHOULDER_START, ELBOW_START, WRIST_START, HAND_START, CAM_START}; 
 
+// === Gyro / Serial control variables ===
 float yaw;
 sensors_event_t orientationData;
 uint8_t idx = 0;
 uint8_t val_idx = 0;
-char value[4] = "000";
+char value[4] = "000"; // holds received angle string (e.g., "090")
 char move;
-
 int fatto, quanto, lettura, offset, val;
 
-
-/*
-void posizione_camminata(){
-  reach_goal(FOTOCAM, 160);
-  reach_goal(base, 90);
-  reach_goal(shoulder, 5); //105
-  reach_goal(GOMITO, 0); //90
-  reach_goal(POLSO, 90); //90
-}*/
-
+// === Position Presets ===
 void posizione_braccio(){
-  //reach_goal(CAM, 160, DELAY_REACH_GOAL);
   reach_goal(BASE, 0, DELAY_REACH_GOAL);
-  reach_goal(SHOULDER, 95, DELAY_REACH_GOAL); //105
-  reach_goal(ELBOW, 0, DELAY_REACH_GOAL); //90
-  reach_goal(WRIST, 90, DELAY_REACH_GOAL); //90
+  reach_goal(SHOULDER, 95, DELAY_REACH_GOAL); 
+  reach_goal(ELBOW, 0, DELAY_REACH_GOAL); 
+  reach_goal(WRIST, 90, DELAY_REACH_GOAL); 
 }
 
 void posizione_camminata(){
@@ -83,15 +75,16 @@ void posizione_camminata(){
   reach_goal(ELBOW, ELBOW_START, DELAY_REACH_GOAL);
   reach_goal(WRIST, WRIST_START, DELAY_REACH_GOAL);
   reach_goal(HAND, HAND_START, DELAY_REACH_GOAL);
-  //reach_goal(CAM, 160, 100);
 }
+
+// === Read yaw from BNO055 ===
 void giro(){
-  
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-  yaw = orientationData.orientation.x; // Yaw (orientazione sull'asse z)
+  yaw = orientationData.orientation.x; 
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
 
+// === Servo Utilities ===
 //read the current position of a specified servo
 int leggi_servo(int motore){
   return gradi_servo[motore];
@@ -132,10 +125,9 @@ void setup() {
   Serial.begin(115200);
 
   servo.begin();
-  servo.setOscillatorFrequency(27000000);  // Frequenza dell'oscillatore interna
-  servo.setPWMFreq(SERVO_FREQ);            // Imposta la frequenza del segnale PWM
+  servo.setOscillatorFrequency(27000000);  
+  servo.setPWMFreq(SERVO_FREQ);           
 
-  //Serial.println("iniziosetup");
   // Set motor control pins as output
   pinMode(vel_DX, OUTPUT);
   pinMode(vel_SX, OUTPUT);
@@ -143,11 +135,11 @@ void setup() {
   pinMode(dir_SX, OUTPUT);
   
 
-  pinMode(Encoder1Signal1, INPUT); //segnale 1 motore 1
-  pinMode(Encoder1Signal2, INPUT); //segnale 2 motore 1
+  pinMode(Encoder1Signal1, INPUT); 
+  pinMode(Encoder1Signal2, INPUT); 
   attachInterrupt(digitalPinToInterrupt(Encoder1Signal1), leggiEncoder, CHANGE);
  
-   while (!Serial) delay(10); // Attendi che la porta seriale si apra
+   while (!Serial) delay(10); // Wait for serial to open
 
   if (!bno.begin()) {
     Serial.print("Errore: BNO055 non rilevato.");
@@ -156,15 +148,14 @@ void setup() {
   posizioneIniziale();
   delay(1000);
   posizione_camminata();
-  //posizione_braccio();
-  Serial.setTimeout(1);
+  Serial.setTimeout(1); // timeout for serial reading
 }
+
 void loop() {
- 
   if (Serial.available())
   {
     char chr = Serial.read();
-    if(chr == 'g'){
+    if(chr == 'g'){ // Orientation read
       idx = 10;
       val_idx=0;
       giro();
@@ -172,7 +163,7 @@ void loop() {
       Serial.println(yaw);
       
     }
-    if(chr == 'w') //avanti piano
+    if(chr == 'w') // Movement command
     {
       idx = 8;
       move=chr;
@@ -181,12 +172,10 @@ void loop() {
     if(chr == 'k'){
       idx = -1;
       val_idx = 0;
-      //posizione_camminata();
     }
      if(chr == 'l'){
       idx = -1;
       val_idx = 0;
-      //posizione_braccio();
     }
   if(chr == 'W') //avanti forte
     {
@@ -206,6 +195,7 @@ void loop() {
       move=chr;
       val_idx = 0;
     }
+    // Joint controls
     // base motor
     if(chr == 'b')
     {
@@ -257,13 +247,12 @@ void loop() {
     
     // Separator
     else if(chr == ',') {
-      val = atoi(value);
+      val = atoi(value); // Convert received number string to int
       
       Serial.flush();
       if(idx == 8)
       {
-        
-        switch(move){
+        switch(move){ // Movement based on selected command (forward/backward)
           case 'w':
             cmTarget=11;
             tickTarget = 488 * cmTarget / 22;
@@ -322,7 +311,7 @@ void loop() {
       Serial.print("Yaw:");
       Serial.println(yaw);
       }
-      
+      // Process joint movement
       else if(idx == 0)
       {
         val = map(val, 0, 180, 180, 0);
@@ -374,8 +363,7 @@ void loop() {
       value[2] = '0';
       value[3] = '\0';
     }
-    // Plain number
-    else
+    else // Store digits into value array
     {
       value[val_idx] = chr;
       val_idx++;
@@ -383,13 +371,12 @@ void loop() {
   }
 }
 
- void leggiEncoder() {
+ void leggiEncoder() { // === Encoder ISR ===
   if (digitalRead(Encoder1Signal2) ==HIGH) 
-    encoder1Count++;  // Rotazione in avanti
-  
-  
+    encoder1Count++;  // Count rising edges only when signal2 is high
 }
 
+// === Rotation using yaw angle ===
 void turnLeft(int gradii) {
   int lettura;
   giro();
@@ -397,14 +384,14 @@ void turnLeft(int gradii) {
   int gradiFatti=0;
   
   moveLeft();
-  
+
+  // Wait until required degrees are rotated
   while (gradiFatti<=gradii) {
       giro();
       lettura=(int) yaw;
       gradiFatti=(360-(lettura-gradoIniziale))%360;
   }
   stopMotors();
-    
 }
 
 void turnRight(int gradii) {
@@ -415,23 +402,22 @@ void turnRight(int gradii) {
   int gradiFatti=0;
   
   moveRight();
-  while (gradiFatti<=gradii) {
+  while (gradiFatti<=gradii) { // Wait until required degrees are rotated
       giro();
       lettura=(int) yaw;
       gradiFatti=(360+lettura-gradoIniziale);
       gradiFatti=gradiFatti%360;
   }
   stopMotors();
-  
 }
 
-void moveForward() {
+// === Motor actions ===
 
+void moveForward() {
   digitalWrite(dir_DX,0);
   digitalWrite(dir_SX,0);
   analogWrite(vel_DX,vel_mot);
   analogWrite(vel_SX,vel_mot);
-
 }
 
 void moveBackward() {
@@ -439,28 +425,23 @@ void moveBackward() {
   digitalWrite(dir_SX,1);
   analogWrite(vel_DX,vel_mot);
   analogWrite(vel_SX,vel_mot);
-
 }
 
 void moveLeft(){
-
   digitalWrite(dir_DX,0);
   digitalWrite(dir_SX,1);
   analogWrite(vel_DX,vel_mot);
   analogWrite(vel_SX,vel_mot);
-
 }
-void moveRight(){
 
+void moveRight(){
   digitalWrite(dir_DX,1);
   digitalWrite(dir_SX,0);
   analogWrite(vel_DX,vel_mot);
   analogWrite(vel_SX,vel_mot);
-
 }
 
 void stopMotors() {
   analogWrite(vel_DX,0);
   analogWrite(vel_SX,0);
-
 }
